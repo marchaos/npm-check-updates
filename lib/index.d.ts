@@ -209,12 +209,18 @@ declare namespace ncu {
   }
 
   type RunResults = Record<string, string>
+
   interface DoctorRunResults {
     upgrades: Record<string, string>,
     failedUpgrades: Record<string, string>,
   }
 
+  interface NcurcResults extends RunOptions {
+    args: string[];
+  }
+
   function run<T extends boolean>({ doctor, ...rest }: { doctor: T } & RunOptions): Promise<T extends true ? DoctorRunResults : RunResults>
+  function getNcurc(configFileName?: string, configFilePath?: string, packageFile?: string): NcurcResults;
 }
 
 export = ncu
