@@ -209,8 +209,12 @@ declare namespace ncu {
   }
 
   type RunResults = Record<string, string>
+  type DoctorRunResults = {
+    upgrades: Record<string, string>,
+    failedUpgrades: Record<string, string>,
+  }
 
-  function run(options?: RunOptions): Promise<RunResults>
+  function run<T extends RunOptions>(options?: T): Promise<T extends { doctor: true } ? DoctorRunResults : RunResults>
 }
 
 export = ncu
