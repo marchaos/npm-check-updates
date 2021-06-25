@@ -220,7 +220,7 @@ declare namespace ncu {
   }
 
   function run<T extends boolean>({ doctor, ...rest }: { doctor: T } & RunOptions): Promise<T extends true ? DoctorRunResults : RunResults>
-  function getNcurc(configFileName?: string, configFilePath?: string, packageFile?: string): NcurcResults;
+  function getNcurc({ configFileName, configFilePath, packageFile }: { configFileName?: string, configFilePath?: string, packageFile?: string }): NcurcResults;
 }
 
 export = ncu
