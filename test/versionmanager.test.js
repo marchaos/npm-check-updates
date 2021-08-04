@@ -284,8 +284,14 @@ describe('versionmanager', () => {
 
     it('upgrade simple, non-semver versions', () => {
       vm.upgradeDependencies({ foo: '1' }, { foo: '2' }).should.eql({ foo: '2' })
-      vm.upgradeDependencies({ mongodb: '0.5' }, { mongodb: '1.4.30' }).should.eql({ mongodb: '1.4' })
+      vm.upgradeDependencies({ foo: '1.0' }, { foo: '1.1' }).should.eql({ foo: '1.1' })
       vm.upgradeDependencies({ 'ncu-test-simple-tag': 'v1' }, { 'ncu-test-simple-tag': 'v3' }).should.eql({ 'ncu-test-simple-tag': 'v3' })
+    })
+
+    it('upgrade github dependencies', () => {
+      vm.upgradeDependencies({ foo: 'github:foo/bar#v1' }, { foo: 'github:foo/bar#v2' }).should.eql({ foo: 'github:foo/bar#v2' })
+      vm.upgradeDependencies({ foo: 'github:foo/bar#v1.0' }, { foo: 'github:foo/bar#v2.0' }).should.eql({ foo: 'github:foo/bar#v2.0' })
+      vm.upgradeDependencies({ foo: 'github:foo/bar#v1.0.0' }, { foo: 'github:foo/bar#v2.0.0' }).should.eql({ foo: 'github:foo/bar#v2.0.0' })
     })
 
     it('upgrade latest versions that already satisfy the specified version', () => {
