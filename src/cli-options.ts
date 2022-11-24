@@ -364,6 +364,13 @@ const cliOptions: CLIOption[] = [
     type: 'string',
   },
   {
+    long: 'doctorSingleInstallArgs',
+    arg: 'args',
+    description:
+      'Specifies extra arguments to pass to the install command of a single package install during the doctor mode package upgrade check.',
+    type: 'string',
+  },
+  {
     long: 'doctorTest',
     arg: 'command',
     description: 'Specifies the test script to use in doctor mode. (default: npm test)',
