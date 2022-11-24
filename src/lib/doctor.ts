@@ -262,7 +262,7 @@ const doctor = async (run: Run, options: Options): Promise<DoctorResult> => {
     for (const [name, version] of Object.entries(upgrades)) {
       try {
         // install single dependency
-        const extraArgs = options.doctorSingleInstallArgs || []
+        const extraArgs = options.doctorSingleInstallArgs ? options.doctorSingleInstallArgs.split(' ') : []
         await npm(
           [
             ...(options.packageManager === 'yarn' ? ['add', ...extraArgs] : ['install', '--no-save', ...extraArgs]),
