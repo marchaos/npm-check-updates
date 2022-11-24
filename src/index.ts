@@ -8,7 +8,7 @@ import untildify from 'untildify'
 import { cliOptionsMap } from './cli-options'
 import { cacheClear } from './lib/cache'
 import chalk, { chalkInit } from './lib/chalk'
-import doctor, { DoctorResult } from './lib/doctor'
+import doctor, { DoctorResult, PackageUpgradeInfo } from './lib/doctor'
 import exists from './lib/exists'
 import findPackage from './lib/findPackage'
 import getNcuRc from './lib/getNcuRc'
@@ -371,8 +371,7 @@ export async function run(
   }
 }
 
-export { default as getNcuRc } from './lib/getNcuRc'
+export { getNcuRc }
+export type { RunOptions, DoctorResult, PackageUpgradeInfo }
 
 export default run
-
-export type { RunOptions }
