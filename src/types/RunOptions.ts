@@ -48,6 +48,9 @@ export interface RunOptions {
   /** Specifies the install script to use in doctor mode. (default: npm install/yarn) */
   doctorInstall?: string
 
+  /** Specifies extra arguments to pass to the install command of a single package install during the doctor mode package upgrade check. */
+  doctorSingleInstallArgs?: string
+
   /** Specifies the test script to use in doctor mode. (default: npm test) */
   doctorTest?: string
 
