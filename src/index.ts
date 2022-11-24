@@ -371,6 +371,8 @@ export async function run(
   }
 }
 
+export { default as getNcuRc } from './lib/getNcuRc'
+
 export default run
 
 export type { RunOptions }
