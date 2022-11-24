@@ -12,7 +12,17 @@ import { VersionSpec } from '../types/VersionSpec'
 import chalk, { chalkInit } from './chalk'
 import upgradePackageData from './upgradePackageData'
 
-type Run = (options?: Options) => Promise<PackageFile | Index<VersionSpec> | void>
+export interface PackageUpgradeInfo {
+  oldVersion: string
+  newVersion: string
+}
+
+export interface DoctorResult {
+  upgrades: Record<string, PackageUpgradeInfo>
+  failedUpgrades: Record<string, PackageUpgradeInfo>
+}
+
+type Run = (options?: Options) => Promise<PackageFile | Index<VersionSpec> | DoctorResult | void>
 
 /** Run the npm CLI in CI mode. */
 const npm = (
@@ -78,7 +88,7 @@ const loadPackageFile = async (options: Options) => {
 
 /** Iteratively installs upgrades and runs tests to identify breaking upgrades. */
 // we have to pass run directly since it would be a circular require if doctor included this file
-const doctor = async (run: Run, options: Options) => {
+const doctor = async (run: Run, options: Options): Promise<DoctorResult> => {
   await chalkInit()
   const lockFileName = options.packageManager === 'yarn' ? 'yarn.lock' : 'package-lock.json'
   const { pkg, pkgFile } = await loadPackageFile(options)
@@ -128,7 +138,7 @@ const doctor = async (run: Run, options: Options) => {
     }
   }
 
-  console.log(`Running tests before upgrading`)
+  console.log('Running tests before upgrading')
 
   // initial install
   await runInstall()
@@ -166,13 +176,16 @@ const doctor = async (run: Run, options: Options) => {
   const upgrades = (await run({
     ...options,
     silent: true,
-    // --doctor triggers the initial call to doctor, but the internal call needs to executes npm-check-updates normally in order to upgrade the dependencies
+    // --doctor triggers the initial call to doctor, but the internal call needs to execute npm-check-updates normally in order to upgrade the dependencies
     doctor: false,
   })) as Index<string>
 
   if (Object.keys(upgrades || {}).length === 0) {
     console.log('All dependencies are up-to-date ' + chalk.green.bold(':)'))
-    return
+    return {
+      upgrades: {},
+      failedUpgrades: {},
+    }
   }
 
   // track if installing dependencies was successful
@@ -197,6 +210,19 @@ const doctor = async (run: Run, options: Options) => {
     })
 
     console.log(`\n${options.interactive ? 'Chosen' : 'All'} dependencies upgraded and installed ${chalk.green(':)')}`)
+
+    return {
+      upgrades: Object.fromEntries(
+        Object.entries(upgrades).map(([name, version]) => [
+          name,
+          {
+            newVersion: version,
+            oldVersion: allDependencies[name],
+          },
+        ]),
+      ),
+      failedUpgrades: {},
+    }
   } catch {
     console.error(chalk.red(installAllSuccess ? 'Tests failed' : 'Install failed'))
     console.log(`Identifying broken dependencies`)
@@ -227,6 +253,9 @@ const doctor = async (run: Run, options: Options) => {
         )
       }
     }
+
+    const successfulUpgrades: Record<string, PackageUpgradeInfo> = {}
+    const failedUpgrades: Record<string, PackageUpgradeInfo> = {}
 
     // iterate upgrades
     // eslint-disable-next-line fp/no-loops
@@ -259,7 +288,17 @@ const doctor = async (run: Run, options: Options) => {
 
         // save working lock file
         lockFile = await fs.readFile(lockFileName, 'utf-8')
+
+        successfulUpgrades[name] = {
+          oldVersion: allDependencies[name],
+          newVersion: version,
+        }
       } catch (e) {
+        failedUpgrades[name] = {
+          oldVersion: allDependencies[name],
+          newVersion: version,
+        }
+
         // print failing package
         console.error(`  ${chalk.red('✗')} ${name} ${allDependencies[name]} → ${version}\n`)
         console.error(chalk.red(e))
@@ -283,6 +322,11 @@ const doctor = async (run: Run, options: Options) => {
 
     // re-install from restored package.json and lockfile
     await runInstall()
+
+    return {
+      upgrades: successfulUpgrades,
+      failedUpgrades,
+    }
   }
 }
 

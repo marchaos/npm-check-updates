@@ -1,7 +1,6 @@
 import chai from 'chai'
 import * as ncu from '../src/'
-import { Index } from '../src/types/IndexType'
-import { VersionSpec } from '../src/types/VersionSpec'
+import { PackageFile } from '../src/types/PackageFile'
 
 chai.should()
 process.env.NCU_TESTS = 'true'
@@ -46,7 +45,7 @@ describe('enginesNode', () => {
     })
 
     upgradedPkg!.should.have.property('dependencies')
-    const deps = upgradedPkg!.dependencies as Index<VersionSpec>
+    const deps = (upgradedPkg as PackageFile)!.dependencies!
     deps.should.have.property('del')
     deps.del.should.equal('4.1.1')
   })
@@ -66,7 +65,7 @@ describe('enginesNode', () => {
     })
 
     upgradedPkg!.should.have.property('dependencies')
-    const deps = upgradedPkg!.dependencies as Index<VersionSpec>
+    const deps = (upgradedPkg as PackageFile)!.dependencies!
     deps.should.have.property('del')
     deps.del.should.equal('3.0.0')
   })
@@ -83,7 +82,7 @@ describe('enginesNode', () => {
     })
 
     upgradedPkg!.should.have.property('dependencies')
-    const deps = upgradedPkg!.dependencies as Index<VersionSpec>
+    const deps = (upgradedPkg as PackageFile)!.dependencies!
     deps.should.have.property('del')
     deps.del.should.not.equal('3.0.0')
     deps.del.should.not.equal('4.1.1')

@@ -8,7 +8,7 @@ import untildify from 'untildify'
 import { cliOptionsMap } from './cli-options'
 import { cacheClear } from './lib/cache'
 import chalk, { chalkInit } from './lib/chalk'
-import doctor from './lib/doctor'
+import doctor, { DoctorResult } from './lib/doctor'
 import exists from './lib/exists'
 import findPackage from './lib/findPackage'
 import getNcuRc from './lib/getNcuRc'
@@ -78,7 +78,7 @@ const npmInstall = async (
   analysis: Index<PackageFile> | PackageFile,
   options: Options,
 ): Promise<unknown> => {
-  // if no packages were upgraded (i.e. all dependendencies deselected in interactive mode), then bail without suggesting an install.
+  // if no packages were upgraded (i.e. all dependencies deselected in interactive mode), then bail without suggesting an install.
   // normalize the analysis for one or many packages
   const analysisNormalized =
     pkgs.length === 1 ? { [pkgs[0]]: analysis as PackageFile } : (analysis as Index<PackageFile>)
@@ -166,10 +166,10 @@ const npmInstall = async (
 export async function run(
   runOptions: RunOptions = {},
   { cli }: { cli?: boolean } = {},
-): Promise<PackageFile | Index<VersionSpec> | void> {
+): Promise<PackageFile | Index<VersionSpec> | DoctorResult | void> {
   const options = await initOptions(runOptions, { cli })
 
-  // chalk may already have been intialized in cli.ts, but when imported as a module
+  // chalk may already have been initialized in cli.ts, but when imported as a module
   // chalkInit is idempotent
   await chalkInit(options.color)
 
@@ -335,7 +335,7 @@ export async function run(
         printJson(options, analysis)
       }
     } else {
-      // Mutate packageFile when glob patern finds only single package
+      // Mutate packageFile when glob pattern finds only single package
       if (pkgs.length === 1 && pkgs[0] !== defaultPackageFilename) {
         options.packageFile = pkgs[0]
       }
